@@ -8,7 +8,7 @@ $config['db'] = array(
 
 $db  = new PDO('mysql:host='. $config['db']['host'] . ';dbname=' . $config['db']['dbname'], $config['db']['username'], $config['db']['password']);
 $facturi = $db->query("SELECT `facturi`.`title`,`facturi`.`id` FROM `facturi`");
-
+$time_start = microtime(true);
 while($rows = $facturi->fetch(PDO::FETCH_ASSOC)){
 	$count  = 0;
 	$valoareTotala = 0;
@@ -22,3 +22,8 @@ while($rows = $facturi->fetch(PDO::FETCH_ASSOC)){
 	}
 	echo '<pre>', print_r($rows['title']), ' are ' , $count , ' plati si o suma de ',$valoareTotala ,'</pre></br>';
 }
+$time_end = microtime(true);
+
+$time = $time_end - $time_start;
+
+echo "A durat $time secunde\n";
