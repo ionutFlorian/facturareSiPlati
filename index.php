@@ -1,4 +1,5 @@
 <?php
+$time_start = microtime(true);
 $config['db'] = array(
 	'host' => 'localhost',
 	'username' => 'root',
@@ -8,7 +9,6 @@ $config['db'] = array(
 
 $db  = new PDO('mysql:host='. $config['db']['host'] . ';dbname=' . $config['db']['dbname'], $config['db']['username'], $config['db']['password']);
 $facturi = $db->query("SELECT `facturi`.`title`,`facturi`.`id` FROM `facturi`");
-$time_start = microtime(true);
 while($rows = $facturi->fetch(PDO::FETCH_ASSOC)){
 	$count  = 0;
 	$valoareTotala = 0;
