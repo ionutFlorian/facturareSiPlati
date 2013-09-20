@@ -18,12 +18,12 @@ $facturi = $db->prepare("select facturi.title, sum(plati.suma) as suma, count(pl
 $facturi->execute();
 
 $factura = $db->query("select count(*) nrPagini from facturi left join plati on(facturi.id = plati.facturaId) group by facturi.id");
-$factura = $factura->fetch(PDO::FETCH_ASSOC);
+$factura = $factura->fetch(PDO::FETCH_ASSOC); 
 
 $totalElemente = $factura['nrPagini'];
 $ultimaPagina = ceil($totalElemente / $numarDeElementePePagina);
 
-//show table
+//show Table
 echo '<table style="border:1px solid #000">';
 echo '<tr style="border:1px solid #000">';
 echo '<th>' . 'Titlu Factura' . '</th>';
