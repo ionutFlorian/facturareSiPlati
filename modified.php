@@ -1,28 +1,51 @@
 <?php
-$time_start = microtime(true);//start time
+
+$time_start = \microtime(true); //start time
 $config['db'] = array(
-	'host' => 'localhost',
-	'username' => 'root',
-	'password' => '',
-	'dbname' => 'site'
+    'host' => 'localhost',
+    'username' => 'root',
+    'password' => '',
+    'dbname' => 'site'
 );
-$db  = new PDO('mysql:host='. $config['db']['host'] . ';dbname=' . $config['db']['dbname'], $config['db']['username'], $config['db']['password']);
-$facturi = $db->query("SELECT * FROM `facturi`");
-while($rows = $facturi->fetch(PDO::FETCH_ASSOC)){
-	$count  = 0;
-	$valoareTotala = 0;
-	$platiPentruFacturi = $db->prepare("SELECT * where `plati`.`facturaId` = :factura");
-	$platiPentruFacturi->bindValue('factura', $rows['id'], PDO::PARAM_STR);
-	$platiPentruFacturi->execute();
-	
-	while($columns = $platiPentruFacturi->fetch(PDO::FETCH_ASSOC)){
-		$count += count($columns);	
-		$valoareTotala += $columns['suma'];
-	}
-	echo '<pre>', print_r($rows['title']), ' are ' , $count , ' plati si o suma de ',$valoareTotala ,'</pre></br>';
+
+$numarDeElementePePagina = 5;
+
+$paginaCurenta = isset($_GET['paginaCurenta']) ? $_GET['paginaCurenta'] : 0;
+$paginaLimita = $paginaCurenta != 1 ? $paginaCurenta*5 - 5 : 0;
+
+$db = new \PDO('mysql:host=' . $config['db']['host'] . ';dbname=' . $config['db']['dbname'], $config['db']['username'], $config['db']['password']);
+$facturi = $db->prepare("select facturi.title, sum(plati.suma) as suma, count(plati.facturaId) as numar from facturi left join plati on(facturi.id = plati.facturaId) group by facturi.id limit {$paginaLimita},{$numarDeElementePePagina}");
+$facturi->execute();
+
+$factura = $db->query("select count(*) nrPagini from facturi left join plati on(facturi.id = plati.facturaId) group by facturi.id");
+$factura = $factura->fetch(PDO::FETCH_ASSOC);
+
+$totalElemente = $factura['nrPagini'];
+$ultimaPagina = ceil($totalElemente / $numarDeElementePePagina);
+
+//show table
+echo '<table style="border:1px solid #000">';
+echo '<tr style="border:1px solid #000">';
+echo '<th>' . 'Titlu Factura' . '</th>';
+echo '<th>' . 'Suma Factura' . '</th>';
+echo '<th>' . 'Numar Plati' . '</th>';
+echo '</tr>';
+while ($rows = $facturi->fetch(PDO::FETCH_ASSOC)) {
+    echo '<tr>';
+    echo '<td style="border:1px solid #000">' . $rows['title'] . '</td>';
+    echo '<td style="border:1px solid #000">' . $rows['suma'] . '</td>';
+    echo '<td style="border:1px solid #000">' . $rows['numar'] . '</td>';
+    echo '</tr>';
 }
-$time_end = microtime(true);
+echo '</table>';
+
+for ($i = 1; $i <= $ultimaPagina; $i++) {
+    echo '<a style="padding-left:5px;" href ="' . $_SERVER['PHP_SELF'] . '?paginaCurenta=' . $i . '">' . $i . '</a>';
+}
+
+$time_end = \microtime(true);
 
 $time = $time_end - $time_start;
 
-echo "A durat $time secunde\n";
+echo "<br />A durat $time secunde\n"; //best time
+echo $paginaCurenta;
