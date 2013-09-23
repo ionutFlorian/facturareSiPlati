@@ -1,7 +1,5 @@
 <?php
 
-include('config.php');
-
 /**
  * Connexion to dataBase
  *
@@ -9,21 +7,32 @@ include('config.php');
  */
 class DB
 {
+
     private static $instance;
-    
+    private $db;
+
     private function __construct()
     {
-        $db = new \PDO('mysql:host=' . $config['db']['host'] . ';dbname=' . $config['db']['dbname'], $config['db']['username'], $config['db']['password']);
+        include('config.php');
+        $this->db = new \PDO('mysql:host=' . $config['db']['host'] . ';dbname=' . $config['db']['dbname'], $config['db']['username'], $config['db']['password']);
     }
 
     public static function getInstance()
     {
         if (!self::$instance) {
-            self::$instance = new Database();
+            self::$instance = new DB();
         }
         return self::$instance;
     }
-}
 
-//Intantiate the class
-$database = DB::getInstance();
+    public function prepare($query)
+    {
+        return $this->db->prepare($query);
+    }
+
+    public function query($query)
+    {
+        return $this->db->query($query);
+    }
+
+}
